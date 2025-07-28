@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Matematicando</title>
+  <style>
+    body {
+      background: white;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tela {
+      display: none;
+      margin-top: 100px;
+    }
+
+    .ativa {
+      display: block;
+    }
+
+    .titulo {
+      font-size: 40px;
+      margin-bottom: 50px;
+    }
+
+    .botao {
+      background-color: #00aaff;
+      color: black;
+      font-size: 40px;
+      padding: 30px 60px;
+      margin: 20px;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .botao:hover {
+      transform: scale(1.1);
+    }
+
+    input[type="text"] {
+      font-size: 30px;
+      padding: 10px;
+      width: 300px;
+      border-radius: 20px;
+      border: 2px solid #00aaff;
+      text-align: center;
+    }
+
+    .resultado {
+      font-size: 35px;
+      margin-top: 50px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Áudios -->
+  <audio id="somVitoria" src="vitoria.mp3"></audio>
+  <audio id="somDerrota" src="derrota.mp3"></audio>
+
+  <!-- TELA 1: PAR ou ÍMPAR -->
+  <div id="tela1" class="tela ativa">
+    <div class="titulo">Escolha: PAR ou ÍMPAR</div>
+    <button class="botao" onclick="escolherParImpar('par')">PAR</button>
+    <button class="botao" onclick="escolherParImpar('impar')">ÍMPAR</button>
+  </div>
+
+  <!-- TELA 2: Digitar número -->
+  <div id="tela2" class="tela">
+    <div class="titulo">Digite um número</div>
+    <input type="text" id="numeroInput" placeholder="Digite um número" />
+  </div>
+
+  <!-- TELA 3: Escolher operação -->
+  <div id="tela3" class="tela">
+    <div class="titulo">Escolha uma operação</div>
+    <button class="botao" onclick="escolherOperacao('+')">+</button>
+    <button class="botao" onclick="escolherOperacao('-')">−</button>
+    <button class="botao" onclick="escolherOperacao('*')">×</button>
+  </div>
+
+  <!-- TELA 4: Resultado -->
+  <div id="tela4" class="tela">
+    <div class="titulo">Resultado da operação:</div>
+    <div class="resultado" id="resultadoTexto"></div>
+    <div class="resultado" id="vencedorTexto"></div>
+    <br>
+    <button id="botaoJogarDeNovo" class="botao hidden" onclick="reiniciar()">Jogar de Novo</button>
+  </div>
+
+  <script>
+    let escolhaJogador = "";
+    let numeroJogador = 0;
+    let numeroBot = 0;
+
+    function escolherParImpar(opcao) {
+      escolhaJogador = opcao;
+      document.getElementById("tela1").classList.remove("ativa");
+      document.getElementById("tela2").classList.add("ativa");
+
+      setTimeout(() => {
+        document.getElementById("numeroInput").focus();
+      }, 100);
+    }
+
+    document.getElementById("numeroInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        const valor = parseInt(this.value.trim());
+        if (isNaN(valor)) {
+          alert("Digite um número válido!");
+          return;
+        }
+
+        numeroJogador = valor;
+        numeroBot = Math.floor(Math.random() * 10) + 1;
+
+        document.getElementById("tela2").classList.remove("ativa");
+        document.getElementById("tela3").classList.add("ativa");
+      }
+    });
+
+    function escolherOperacao(operador) {
+      const operacoes = ["+", "-", "*", "/"];
+      const operadorBot = operacoes[Math.floor(Math.random() * operacoes.length)];
+
+      let resultado = calcular(numeroJogador, numeroBot, operador);
+
+      document.getElementById("tela3").classList.remove("ativa");
+      document.getElementById("tela4").classList.add("ativa");
+
+      document.getElementById("resultadoTexto").textContent =
+        `${numeroJogador} ${operador} ${numeroBot} = ${resultado}`;
+
+      const resultadoEhPar = resultado % 2 === 0;
+      const jogadorVenceu = (escolhaJogador === "par" && resultadoEhPar) ||
+                            (escolhaJogador === "impar" && !resultadoEhPar);
+
+      document.getElementById("vencedorTexto").textContent =
+        jogadorVenceu ? "🎉 Você venceu!" : "😢 Você perdeu!";
+
+      // Som de vitória ou derrota
+      if (jogadorVenceu) {
+        document.getElementById("somVitoria").play();
+      } else {
+        document.getElementById("somDerrota").play();
+      }
+
+      // Mostrar botão "Jogar de novo" após 5 segundos
+      setTimeout(() => {
+        document.getElementById("botaoJogarDeNovo").classList.remove("hidden");
+      }, 5000);
+    }
+
+    function calcular(a, b, operador) {
+      switch (operador) {
+        case "+": return a + b;
+        case "-": return a - b;
+        case "*": return a * b;
+        case "/": return b !== 0 ? (a / b).toFixed(2) : 0;
+        default: return 0;
+      }
+    }
+
+    function reiniciar() {
+      document.getElementById("numeroInput").value = "";
+      document.getElementById("botaoJogarDeNovo").classList.add("hidden");
+      document.getElementById("tela4").classList.remove("ativa");
+      document.getElementById("tela1").classList.add("ativa");
+    }
+  </script>
+</body>
+</html>
